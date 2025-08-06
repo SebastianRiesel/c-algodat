@@ -29,11 +29,50 @@ void ald_slinkedlist_free(ald_slinkedlist_t* list){
 
 }
 
-
-
 void ald_slinkedlist_free_next(ald_slinkedlist_t* list){
     ald_slinkedlist_free(list->next);
     list->next = NULL;
+}
+
+ald_slinkedlist_element_t* ald_slinkedlist_get_element(ald_slinkedlist_t* list, size_t index){
+    if(list == NULL){
+        return NULL;
+    }
+
+
+    ald_slinkedlist_element_t* current = list;
+    size_t current_index = 0;
+
+    while(current != NULL){
+
+        if(current_index == index){
+            return current;
+        }
+        current = current->next;
+        current_index++;
+    }
+    return list;
+}
+
+
+void* ald_slinkedlist_get(ald_slinkedlist_t* list, size_t index){
+    ald_slinkedlist_element_t* element = ald_slinkedlist_get_element(list, index);
+    if(element != NULL){
+        return element->data;
+    }
+
+    return NULL;
+}
+
+
+int ald_slinkedlist_set(ald_slinkedlist_t* list, size_t index, void* data){
+    ald_slinkedlist_element_t* element = ald_slinkedlist_get_element(list, index);
+    if(element != NULL){
+        element->data = data;
+        return 0;
+    }
+
+    return -1;
 }
 
 
@@ -98,26 +137,170 @@ void ald_slinkedlist_insert_after(ald_slinkedlist_element_t* element, void* data
 }
 
 
-ald_slinkedlist_t* ald_slinkedlist_concat(ald_slinkedlist_t* list1, ald_slinkedlist_t* list2){return NULL;}
+ald_slinkedlist_t* ald_slinkedlist_concat(ald_slinkedlist_t* list1, ald_slinkedlist_t* list2){
+
+    if(list1 == NULL){
+        return list2;
+    }
+    if(list2 == NULL){
+        return list1;
+    }
+
+    // go to the end of the first list
+    ald_slinkedlist_t* current_element = list1;
+    while(current_element->next!=NULL){
+        current_element = current_element->next;
+    }
+
+    current_element->next = list2;
+
+    return list1;
+}
 
 
-ald_slinkedlist_t* ald_slinkedlist_insert_list(ald_slinkedlist_element_t* element, ald_slinkedlist_t* list2){return NULL;}
+void ald_slinkedlist_insert_list(ald_slinkedlist_element_t* element, ald_slinkedlist_t* list2){
+    if(element==NULL){
+        return;
+    }
 
+    if(list2 == NULL){
+        return;
+    }
 
-bool ald_slinkedlist_contains(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp){return false;}
+    ald_slinkedlist_element_t* last_element_list2 = list2;
 
+    while(last_element_list2->next != NULL){
+        last_element_list2 = last_element_list2->next;
+    }
 
-ssize_t ald_slinkedlist_index_of(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp){return -1;}
+    last_element_list2->next = element->next;
 
+    element->next = list2;
 
-ald_slinkedlist_t* ald_slinkedlist_search(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp){return NULL;}
+}
 
-ald_slinkedlist_t* ald_slinkedlist_remove(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp){return NULL;}
+bool ald_slinkedlist_contains(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp){
+    return ald_slinkedlist_index_of(list, data, cmp) != -1;
+}
 
+ssize_t ald_slinkedlist_index_of(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp){
+    if(list == NULL){
+        return -1;
+    }
 
-ald_slinkedlist_t* ald_slinkedlist_remove_element(ald_slinkedlist_t* list, ald_slinkedlist_element_t* element){return NULL;}
+    ald_slinkedlist_element_t* current = list;
+    ssize_t idx = 0;
+    while(current->next != NULL){
 
-ald_slinkedlist_t* ald_slinkedlist_remove_at(ald_slinkedlist_t* list, size_t index){return NULL;}
+        if(cmp(data, current->data) == 0){
+            return idx;
+        }
+
+        current = current->next;
+        ++idx;
+    }
+    return -1;
+}
+
+ald_slinkedlist_t* ald_slinkedlist_search(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp){
+    if(list == NULL){
+        return NULL;
+    }
+
+    ald_slinkedlist_element_t* current = list;
+    while(current->next != NULL){
+
+        if(cmp(data, current->data) == 0){
+            return current;
+        }
+
+        current = current->next;
+    }
+    return NULL;
+}
+
+ald_slinkedlist_t* ald_slinkedlist_remove(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp){
+    if(list == NULL){
+        return NULL;
+    }
+
+    if(cmp(data, list->data) == 0){
+        ald_slinkedlist_t* next = list->next;
+        ald_slinkedlist_element_free(list);
+        return next;
+    }
+
+    ald_slinkedlist_element_t* current = list->next;
+    ald_slinkedlist_element_t* previous = list;
+
+    while(current != NULL){
+
+        if(cmp(data, current->data) == 0){
+            previous->next = current->next;
+            ald_slinkedlist_element_free(current);
+            return list;
+        }
+        previous = current;
+        current = current->next;
+    }
+    return list;
+}
+
+ald_slinkedlist_t* ald_slinkedlist_remove_element(ald_slinkedlist_t* list, ald_slinkedlist_element_t* element){
+    if(list == NULL){
+        return NULL;
+    }
+
+    if(list == element){
+        ald_slinkedlist_t* next = list->next;
+        ald_slinkedlist_element_free(list);
+        return next;
+    }
+
+    ald_slinkedlist_element_t* current = list->next;
+    ald_slinkedlist_element_t* previous = list;
+
+    while(current != NULL){
+
+        if(current == element){
+            previous->next = current->next;
+            ald_slinkedlist_element_free(current);
+            return list;
+        }
+        previous = current;
+        current = current->next;
+    }
+    return list;
+}
+
+ald_slinkedlist_t* ald_slinkedlist_remove_at(ald_slinkedlist_t* list, size_t index){
+    if(list == NULL){
+        return NULL;
+    }
+
+    if(index == 0){
+        ald_slinkedlist_t* next = list->next;
+        ald_slinkedlist_element_free(list);
+        return next;
+    }
+
+    ald_slinkedlist_element_t* current = list->next;
+    ald_slinkedlist_element_t* previous = list;
+    size_t current_index = 1;
+
+    while(current != NULL){
+
+        if(current_index == index){
+            previous->next = current->next;
+            ald_slinkedlist_element_free(current);
+            return list;
+        }
+        previous = current;
+        current = current->next;
+        current_index++;
+    }
+    return list;
+}
 
 
 size_t ald_slinkedlist_size(ald_slinkedlist_t* list){

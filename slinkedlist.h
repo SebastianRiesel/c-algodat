@@ -37,6 +37,23 @@ void ald_slinkedlist_free(ald_slinkedlist_t* list);
 
 
 /*
+ * Returns the ald_slinkedlist_element_t* at the given index. Returns NULL if index is out of bounds.
+ */
+ald_slinkedlist_element_t* ald_slinkedlist_get_element(ald_slinkedlist_t* list, size_t index);
+
+/*
+ * Returns the data pointer at the given index. Returns NULL if index is out of bounds.
+ */
+void* ald_slinkedlist_get(ald_slinkedlist_t* list, size_t index);
+
+/*
+ * Sets the data at the given index. Returns 0 if setting was succesful, returns not 0 otherwise.
+ */
+int ald_slinkedlist_set(ald_slinkedlist_t* list, size_t index, void* data);
+
+
+
+/*
  * Frees an entire linked list on the heap, beginning with the next element, not this one.
  * Sets the next pointer of this element to NULL.
  * Can be used to cut a list and remove all elements to the right.
@@ -76,27 +93,27 @@ ald_slinkedlist_t* ald_slinkedlist_concat(ald_slinkedlist_t* list1, ald_slinkedl
 /*
  * Inserts the list into the another after the given element.
  */
-ald_slinkedlist_t* ald_slinkedlist_insert_list(ald_slinkedlist_element_t* element, ald_slinkedlist_t* list2);
+void ald_slinkedlist_insert_list(ald_slinkedlist_element_t* element, ald_slinkedlist_t* list2);
 
 /*
  * Returns true if the list contains the specified data, comparing with the given compare function.
  */
-bool ald_slinkedlist_contains(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp);
+bool ald_slinkedlist_contains(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp);
 
 /*
  * Returns the index of the given data, compared with the given compare function as size_t, if the list contains it. Otherwise, returns -1;
  */
-ssize_t ald_slinkedlist_index_of(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp);
+ssize_t ald_slinkedlist_index_of(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp);
 
 /*
  * Returns the pointer to first element in the list with the given data, if the list contains it. Compares elements with the given compare function.
  */
-ald_slinkedlist_t* ald_slinkedlist_search(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp);
+ald_slinkedlist_t* ald_slinkedlist_search(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp);
 
 /*
  * Removes the first element with the given data out of the list, if it exists. Returns the new pointer to start of the list.
  */
-ald_slinkedlist_t* ald_slinkedlist_remove(ald_slinkedlist_t* list, void* data, ald_compare_function_t* cmp);
+ald_slinkedlist_t* ald_slinkedlist_remove(ald_slinkedlist_t* list, void* data, ald_compare_function_t cmp);
 
 /*
  * Removes the element from the list, if it exists. Returns the new pointer to start of the list.
