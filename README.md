@@ -11,7 +11,6 @@ Indentation is done with spaces.
 Structs are prefixed with "s_".
 Types are suffixed with "_t".
 
-
 Documentation comments above functions and datatypes are written as ```/* Block Comments*/``` with at least three lines.
 
 # Build
